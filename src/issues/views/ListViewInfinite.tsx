@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { IssueList } from '../components/IssueList';
 import { LabelPicker } from '../components/LabelPicker';
-import { useIssues } from '../../hooks/useIssues';
 import { LoadingIcon } from '../../shared/components/LoadingIcon';
 import { State } from '../interfaces/issue';
+import { useIssuesInfinite } from '../../hooks/useIssuesInfinite';
 
-export const ListView = () => {
+export const ListViewInfinite = () => {
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const [state, setstate] = useState<State>();
-  const { issuesQuery, page, nextPage, prevPage } = useIssues({ state, labels: selectedLabels });
+
+  const { issuesQuery } = useIssuesInfinite({ state, labels: selectedLabels });
+  
   const onLabelChanged = (labelName: string) => {
     selectedLabels.includes(labelName)
       ? setSelectedLabels(selectedLabels.filter((label) => label !== labelName))
@@ -21,17 +23,19 @@ export const ListView = () => {
         {issuesQuery.isLoading ? (
           <LoadingIcon />
         ) : (
-          <IssueList issues={issuesQuery.data || []} state={state} onStatedChanged={(newState) => setstate(newState)} />
+          <IssueList
+            issues={issuesQuery.data?.pages.flat() || []}
+            state={state}
+            onStatedChanged={(newState) => setstate(newState)}
+          />
         )}
-        <div className="d-flex mt-2 justify-content-between align-item-center">
-          <button disabled={issuesQuery.isFetching} onClick={prevPage} className="btn btn-outline-primary">
-            Prev
-          </button>
-          <span>{page}</span>
-          <button disabled={issuesQuery.isFetching} onClick={nextPage} className="btn btn-outline-primary">
-            Next
-          </button>
-        </div>
+        <button
+          disabled={!issuesQuery.hasNextPage}
+          onClick={() => issuesQuery.fetchNextPage()}
+          className="btn btn-outline-primary mt-2"
+        >
+          Load More
+        </button>
       </div>
       <div className="col-4">
         <LabelPicker selectedLabels={selectedLabels} onChange={(labelName) => onLabelChanged(labelName)} />

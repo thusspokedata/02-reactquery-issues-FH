@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { githubApi } from '../api/githubApi';
 import { Issue, State } from '../issues/interfaces/issue';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const getIssues = async ({ labels, state, page = 1 }: Props): Promise<Issue[]> => {
-  await sleep(2);
+  // await sleep(2);
   const params = new URLSearchParams();
   if (state) params.append('state', state);
   if (labels.length > 0) {
@@ -28,6 +28,10 @@ const getIssues = async ({ labels, state, page = 1 }: Props): Promise<Issue[]> =
 export const useIssues = ({ state, labels }: Props) => {
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    setPage(1);
+  }, [state, labels]);
+
   const issuesQuery = useQuery(['issues', { state, labels, page }], () => getIssues({ labels, state, page }), {
     staleTime: 1000 * 60 * 60,
   });
@@ -38,5 +42,13 @@ export const useIssues = ({ state, labels }: Props) => {
   const prevPage = () => {
     if (page > 1) setPage(page - 1);
   };
-  return { issuesQuery, page, nextPage, prevPage };
+  return {
+    //Properties
+    issuesQuery,
+    //Getter
+    page: issuesQuery.isLoading ? 'loading...' : page,
+    // Methods
+    nextPage,
+    prevPage,
+  };
 };
