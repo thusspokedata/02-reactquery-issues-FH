@@ -1,5 +1,3 @@
-# React Query - Issues
+https://github.com/Klerith/react-query-issues/tree/fin-seccion-7
 
-1. Clonar repositorio
-2. Ejecutar ``` yarn install``` o ```npm install```
-3. Abrir el URL del proyecto
+https://cursos.devtalles.com/courses/take/react-query/lessons/39767289-introduccion-al-curso
